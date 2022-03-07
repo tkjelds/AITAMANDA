@@ -16,7 +16,7 @@ import java.io.IOException;
 public class OthelloGUI extends JComponent implements MouseListener
 {
     static final long 	serialVersionUID = 1234567890;
-	static final int 	imgSize = 100;
+	static final int 	imgSize = 70;//100;
 	
 	private GameState state;		// The state of the game
     private int size;				// Number of rows and columns on the board
