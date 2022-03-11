@@ -1,78 +1,14 @@
 import java.util.ArrayList;
 import java.lang.Object.*;  
 
-public class ABAI implements IOthelloAI{
+public class Mini implements IOthelloAI{
     int boardValues[][];
-    int depth;
 
 	public Position decideMove(GameState gameState) {
-        GameState gS = new GameState(gameState.getBoard(), gameState.getPlayerInTurn());
-		return MINIMAX_SEARCH(gS);
-	}
-
-    private GameState insert(GameState gameState, Position pos) {
-        gameState.insertToken(pos);
-        return gameState;
-    }
-
-    private Position MINIMAX_SEARCH(GameState gameState) {
         boardValues = new int[gameState.getBoard().length][gameState.getBoard().length];
-        depth = 5;
         giveBoardValues();
-        UtilityMove startUM = new UtilityMove(new Position(-1, -1));
-        var UtilityMove = MAX_VALUE(gameState, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        return UtilityMove.getMove();
-    }
-
-    private UtilityMove MAX_VALUE(GameState gameState, int alpha, int beta) {
-        if ( gameState.legalMoves().isEmpty() )
-            return new UtilityMove(new Position(-1, -1));
-            //return new UtilityMove(new Position(-1,-1));
-        var v = Integer.MIN_VALUE;
-        var m = new Position(-1, -1);
-        //Position bestMove = new Position(-1, -1);
-        for(Position move : gameState.legalMoves()) {
-            //if ( currentDepth >= depth ) break;
-            //System.out.println("MAX "+move+", "+currentDepth+" um1.move = "+minValue.getMove());
-            UtilityMove um2 = MIN_VALUE(insert(gameState, move), alpha, beta);
-            //UtilityMove um2 = new UtilityMove(move); 
-            if(um2.move == new Position(-1, -1)) break;
-            if (um2.getUtility() > v) {
-                v = um2.getUtility();
-                m = move;
-                alpha = new UtilityMove(move).getUtility();
-            }
-            if (v >= beta) {
-                return new UtilityMove(m);
-            }
-        }
-        return new UtilityMove(m);
-    }
-	
-    private UtilityMove MIN_VALUE(GameState gameState, int alpha, int beta) {
-        if ( gameState.legalMoves().isEmpty() )
-            return new UtilityMove(new Position(-1,-1));    
-        var v = Integer.MAX_VALUE;
-        var m = new Position(-1, -1);
-        //Position bestMove = new Position(-1, -1);
-        for(var move : gameState.legalMoves()) { 
-            //if ( currentDepth >= depth ) break;
-            //System.out.println("MIN "+move+", "+currentDepth+" um1.move = "+alpha.getMove());
-            UtilityMove um2 = MAX_VALUE(insert(gameState, move), alpha, beta);
-            //UtilityMove um2 = new UtilityMove(move); 
-            if(um2.move == new Position(-1, -1)) break;
-            if(um2.getUtility() < v) {
-                v = um2.getUtility();
-                m = move;
-                beta = new UtilityMove(move).getUtility();
-            }
-            if(v <= alpha) {
-                return new UtilityMove(m);
-            }
-        }
-        //return new UtilityMove(v, bestMove);
-        return new UtilityMove(m);
-    }
+		return MINIMAX_SEARCH(gameState);
+	}
 
     private void giveBoardValues() {
         topBottomValues(0);
@@ -150,6 +86,52 @@ public class ABAI implements IOthelloAI{
             boardValues[y][x] = 2;
         }
         boardValues[boardValues.length-1][x] = 0;
+    }
+
+    private Position MINIMAX_SEARCH(GameState gameState) {
+        var UtilityMove = MAX_VALUE(gameState);
+        return UtilityMove.getMove();
+    }
+
+    private UtilityMove MAX_VALUE(GameState gameState) {
+        if ( gameState.legalMoves().isEmpty() )
+            return new UtilityMove(new Position(-1,-1));
+        var v = Integer.MIN_VALUE;
+        Position bestMove = new Position(-1, -1);
+        for(Position move : gameState.legalMoves()) {
+            UtilityMove um2 = new UtilityMove(move); 
+            if(um2.move == new Position(-1, -1)) break;
+            if (um2.getUtility() > v) {
+                v = um2.getUtility();
+                bestMove = um2.getMove();
+            }         
+        }
+        return new UtilityMove(bestMove);
+    }
+	
+    private UtilityMove MIN_VALUE(GameState gameState) {
+        if ( gameState.legalMoves().isEmpty() )
+            return new UtilityMove(new Position(-1,-1));    
+        var v = Integer.MAX_VALUE;
+        Position bestMove = new Position(-1, -1);
+        int count = 0;
+        for(var move : gameState.legalMoves()) { 
+            count++;
+            if(count >= 3) break;
+            //System.out.println("MIN Position row: "+move.row+", col: "+move.col);
+            GameState newGM = gameState;
+            //if(newGM.insertToken(move)) {
+                UtilityMove um2 = new UtilityMove(move); //MAX_VALUE(gameState);
+                //UtilityMove um2 = MAX_VALUE(gameState);
+                if(um2.move == new Position(-1, -1)) break;
+                if(um2.getUtility() < v) {
+                    v = um2.getUtility();
+                    bestMove = um2.getMove();
+                }
+            //}
+        }
+        //return new UtilityMove(v, bestMove);
+        return new UtilityMove(bestMove);
     }
 
     public class UtilityMove {
