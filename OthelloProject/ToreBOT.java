@@ -5,6 +5,9 @@ import java.util.Arrays;
 
 public class ToreBOT implements IOthelloAI {
     
+    int alpha = Integer.MIN_VALUE;
+    int beta = Integer.MAX_VALUE;
+
     public Position decideMove(GameState s) {
         return oneDepth(s);
     }
