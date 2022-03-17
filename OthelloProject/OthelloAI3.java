@@ -1,9 +1,10 @@
-public class AlphaMemer implements IOthelloAI {
+public class OthelloAI3 implements IOthelloAI {
 
     private static final int _boardsize_ = 8;
     private static final int _player_ = 1;
     private static Position Move = null;
-    private int _maxDepth_ = 7;
+    private int _maxDepth_ = 5;
+    public int _iterations_ = 0;
     @Override
     public Position decideMove(GameState s) {
         int alpha = Integer.MIN_VALUE;
@@ -19,12 +20,12 @@ public class AlphaMemer implements IOthelloAI {
         if (depth == _maxDepth_ ) {
             return getBoardValue(s.getBoard());
         }
-
+        depth++;
         int v = Integer.MIN_VALUE;
         for (Position a : s.legalMoves()) {
             var nextState = new GameState(s.getBoard(), s.getPlayerInTurn());
             nextState.insertToken(a);
-            var v2 = MinValue(nextState, alpha, beta, depth++);
+            var v2 = MinValue(nextState, alpha, beta, depth);
             if(v2 > v)
                 v = v2;
                 Move = a;
@@ -42,16 +43,16 @@ public class AlphaMemer implements IOthelloAI {
         if (depth == _maxDepth_ ) {
             return getBoardValue(s.getBoard());
         }
-
+        depth++;
         int v = Integer.MAX_VALUE;
         for (Position a : s.legalMoves()) {
             var nextState = new GameState(s.getBoard(), s.getPlayerInTurn());
             nextState.insertToken(a);
-            var v2 = MaxValue(nextState, alpha, beta, depth++);
+            var v2 = MaxValue(nextState, alpha, beta, depth);
             if(v2 < v)
                 v = v2;
                 Move = a;
-                beta = Math.min(alpha, v);
+                beta = Math.min(beta, v);
             if(v <= beta)
                 return v;
         }
@@ -83,5 +84,5 @@ private int getBoardValue(int[][] board){
     return value;
 
 }
-    
+
 }
