@@ -43,9 +43,9 @@ public class AlphaBetaPruner implements IOthelloAI {
         depth++;
         int v = Integer.MIN_VALUE;
 
-        for (var pos : s.legalMoves()) {
+        for (var a : s.legalMoves()) {
             var nextState = new GameState(s.getBoard(), s.getPlayerInTurn());
-            nextState.insertToken(pos);
+            nextState.insertToken(a);
             var v2 = MinValue(nextState, alpha, beta, depth);
             if (v2 > v){
                 v = v2;
@@ -68,9 +68,9 @@ public class AlphaBetaPruner implements IOthelloAI {
         depth++;
         int v = Integer.MAX_VALUE;
 
-        for (var pos : s.legalMoves()) {
+        for (var a : s.legalMoves()) {
             var nextState = new GameState(s.getBoard(), s.getPlayerInTurn());
-            nextState.insertToken(pos);
+            nextState.insertToken(a);
             var v2 = MaxValue(nextState, alpha, beta, depth);
             if (v2 < v){
                 v = v2;
