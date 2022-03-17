@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Class to represent the state of a game of Othello.  The state is defined by a 2-dimensional
@@ -10,6 +11,7 @@ public class GameState {
 	private int[][] board; 		// Possible values: 0 (empty), 1 (black), 2 (white)
 	private int currentPlayer; 	// The player who is next to put a token on the board. Value is 1 or 2.
 	private int size;  			// The number of columns = the number of rows on the board
+	private HashMap<Position, Integer> captures;
 	
 	//************ Constructors ****************//
 	/**
@@ -29,6 +31,7 @@ public class GameState {
         board[half+1][half+1] = 1;
         board[half][half+1] = 2;
         board[half+1][half] = 2;   
+		captures = new HashMap<>();
 	}
 	
 	/**
@@ -47,6 +50,7 @@ public class GameState {
 			}
 		}
 		this.currentPlayer = playerToTakeTurn;
+		captures = new HashMap<>();
 	}
 	
 	//************ Getter methods *******************//
@@ -160,6 +164,11 @@ public class GameState {
     		for (int deltaX = -1; deltaX <= 1; deltaX++){
     			for (int deltaY = -1; deltaY <= 1; deltaY++){
     				if ( captureInDirection(p, deltaX, deltaY) > 0 ){
+						if(captures.containsKey(p)) {
+							captures.put(p, captures.get(p)+captureInDirection(p, deltaX, deltaY));
+						} else {
+							captures.put(p, captureInDirection(p, deltaX, deltaY));
+						}
     	    			legalPlaces.add(p);
     				}
     			}
@@ -167,6 +176,11 @@ public class GameState {
     	}
     	return legalPlaces;
     }	
+
+	public int getCaptures(Position pos) {
+		if(captures.containsKey(pos)) return captures.get(pos);
+		else return 0;
+	}
     
     /**
      * Checks how many tokens of the opponent the player can capture in the direction given by deltaX and deltaY
