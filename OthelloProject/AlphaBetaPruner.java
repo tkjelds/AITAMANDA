@@ -6,25 +6,32 @@ public class AlphaBetaPruner implements IOthelloAI {
 
     private int _player_ = 2;
 
+    private int _evalMode_ = 1;
+
     public Position decideMove(GameState s) {
 
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
 
+        return FirstMax(s, alpha, beta, 0);
+    }
+
+    private Position FirstMax(GameState s, int alpha, int beta, int depth) {
         int v = Integer.MIN_VALUE;
         Position bestPos = null;
         for (var pos : s.legalMoves()) {
             var nextState = new GameState(s.getBoard(), s.getPlayerInTurn());
             nextState.insertToken(pos);
-            int v2 = MinValue(nextState, alpha, beta, 0);
+            var v2 = MinValue(nextState, alpha, beta, 0);
             if (v2 >= v) {
                 v = v2;
                 bestPos = pos;
             }
+            if (v >= beta)
+                return bestPos;
         }
         return bestPos;
     }
-
     private int MaxValue(GameState s, int alpha, int beta, int depth) {
         // System.out.println("alpha = " + alpha + "\n");
         if (s.isFinished())
@@ -87,13 +94,20 @@ public class AlphaBetaPruner implements IOthelloAI {
     public int getEval(GameState s) {
         int[][] board = s.getBoard();
         int value = 0;
-        for (int index1 = 0; index1 < _boardsize_; index1++) {
-            for (int index2 = 0; index2 < _boardsize_; index2++) {
-                if (board[index1][index2] == _player_)
-                    value += _weightedBoard_[index1][index2];
+        switch (_evalMode_) {
+            case 0:
+            for (int index1 = 0; index1 < _boardsize_; index1++) {
+                for (int index2 = 0; index2 < _boardsize_; index2++) {
+                    if (board[index1][index2] == _player_)
+                        value += _weightedBoard_[index1][index2];
+                }
             }
+            case 1:
+            value = s.countTokens()[_player_-1];
+                break;
         }
         return value;
+
     }
 
 }
