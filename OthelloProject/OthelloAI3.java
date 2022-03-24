@@ -4,7 +4,6 @@ public class OthelloAI3 implements IOthelloAI {
 
     private static final int _boardsize_ = 8;
     private static final int _player_ = 1;
-    private static Position _move_ = null;
     private int _maxDepth_ = 5;
 
     @Override
