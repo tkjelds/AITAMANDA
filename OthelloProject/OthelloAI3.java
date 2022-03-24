@@ -13,15 +13,17 @@ public class OthelloAI3 implements IOthelloAI {
 
     
     /** 
-     * @param s
-     * @return Position
+     * @param s Takes in the current gameState
+     * @return Position best position given at the given depth
+     * This function initializes the MinMax Algorithm. 
+     * All of the variables have been nanmed as close to the books variables as possible.
      */
     public Position MiniMax(GameState s){
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
         int v = Integer.MIN_VALUE;
         Position move = null;
-        for (var a : s.legalMoves()) {
+        for (var a : s.legalMoves()) { 
             var nextState = new GameState(s.getBoard(), s.getPlayerInTurn());
             nextState.insertToken(a);
             var v2 = MinValue(nextState, alpha, beta, 0);
@@ -42,6 +44,7 @@ public class OthelloAI3 implements IOthelloAI {
      * @param beta
      * @param depth The current depth of the search
      * @return int. The utility of the branching path
+     * The max porition of the of the MinMax Algorithm
      */
     public int MaxValue(GameState s, int alpha, int beta, int depth) {
         if (s.isFinished()) { // Check if game is terminal
@@ -54,9 +57,9 @@ public class OthelloAI3 implements IOthelloAI {
         int v = Integer.MIN_VALUE;
         for (Position a : s.legalMoves()) { // Check all legal moves given a gamestate.
             var nextState = new GameState(s.getBoard(), s.getPlayerInTurn());
-            nextState.insertToken(a);
+            nextState.insertToken(a);  // Creates a new gamestate branch
             var v2 = MinValue(nextState, alpha, beta, depth);
-            if (v2 > v){
+            if (v2 > v){ // Updates the value if a better value is found.
                 v = v2;
                 alpha = Math.max(alpha, v);
             }
@@ -72,10 +75,11 @@ public class OthelloAI3 implements IOthelloAI {
      * @param s     The given gamestate
      * @param alpha
      * @param beta
-     * @param depth 
+     * @param depth The current depth
      * @return int  The utility of the branching path
      */
     public int MinValue(GameState s, int alpha, int beta, int depth) {
+         // Guard statements
         if (s.isFinished()) {
             return getBoardValue(s.getBoard());
         }
@@ -86,13 +90,13 @@ public class OthelloAI3 implements IOthelloAI {
         int v = Integer.MAX_VALUE;
         for (Position a : s.legalMoves()) {
             var nextState = new GameState(s.getBoard(), s.getPlayerInTurn());
-            nextState.insertToken(a);
+            nextState.insertToken(a); // New gamestate branch
             var v2 = MaxValue(nextState, alpha, beta, depth);
             if (v2 < v){
                 v = v2;
                 beta = Math.min(beta, v);
             }
-            if (v <= alpha)
+            if (v <= alpha) // Prunin step
                 return v;
         }
         return v;
@@ -100,9 +104,11 @@ public class OthelloAI3 implements IOthelloAI {
     }
 
     /**
-     * InnerAlphaMemer
+     * Point values are related to the boardspaces favourability
+     * Corners have the most utility and are therefore given 4, utility.
+     * Inspiration taken from the following paper: 
+     * https://courses.cs.washington.edu/courses/cse573/04au/Project/mini1/RUSSIA/Final_Paper.pdf
      */
-
     private int[][] _weightedBoard_ = {
             { 4, -3, 2, 2, 2, 2, -3, 4 },
             { -3, -4, -1, -1, -1, -1, -4, -3 },
@@ -116,6 +122,7 @@ public class OthelloAI3 implements IOthelloAI {
 
     
     /** 
+     * Given a board, returns the utility of that given board.
      * @param board
      * @return int
      */
