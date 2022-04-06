@@ -18,12 +18,12 @@ public class toreBDD implements IQueensLogic{
     public void initializeBoard(int size) {
         this.size = size;
         board = new int[size][size];
-        fact = JFactory.init(200000,200000);
+        fact = JFactory.init(500000,500000);
         fact.setVarNum(size * size);
         True = fact.one();
         False = fact.zero();
-        rulesBDD = True;
-        assignRules();
+        rulesBDD = True; // We will be using and operations, on the bdd, so it only makes sense for this to be true.
+        buildBDD();
     }
 
     /**
@@ -52,7 +52,7 @@ public class toreBDD implements IQueensLogic{
      * @param column
      * @param row
      * @return The number of variable in the factory.
-     * To be used when fact.ith or fact.nith
+     * To be used with fact.ith
      */
     public int getVar(int column, int row){
         int rowPlacement = column*size;
@@ -63,7 +63,7 @@ public class toreBDD implements IQueensLogic{
      * Goes through each variable and assign each with horizontal, vertical and diagonal rules.
      *
      */
-    public void assignRules(){
+    public void buildBDD(){
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
                 horizontalRule(x,y);
@@ -87,7 +87,6 @@ public class toreBDD implements IQueensLogic{
             for (int x = 0; x < size; x++) {
                 rowRule = rowRule.or(fact.ithVar(getVar(x,y)));
             }
-
             rules = rules.and(rowRule);
         }
         rulesBDD = rulesBDD.and(rules); // adds to the overall ruleset.
@@ -97,11 +96,12 @@ public class toreBDD implements IQueensLogic{
         for (int x = 0; x < size; x++) {
             if (x!=column){ // Check to make sure to skip the variable in question.
                 // Creates a long line of ands that says that they all have to be false.
-                rules = rules.and(fact.nithVar(getVar(x,row)));
+                rules = rules.apply(fact.ithVar(getVar(x,row)),BDDFactory.nand);
+                //rules = rules.and(fact.ithVar(getVar(x,row)).not());
             }
         }
         // Rule that says either that the above and below variables are false, or that the variable(column,row) is false.
-        rules = (fact.nithVar(getVar(column,row))).or(rules);
+        rules = (fact.ithVar(getVar(column,row)).not()).or(rules);
         rulesBDD = rulesBDD.and(rules); // Adding to the overall ruleset.
     }
 
@@ -115,11 +115,11 @@ public class toreBDD implements IQueensLogic{
         for (int y = 0; y < size; y++) {
             if (y!=row){ // Check to make sure to skip the variable in question
                 // Creates a long line of ands that says that they all have to be false
-                rules = rules.and(fact.nithVar(getVar(column,y)));
+                rules = rules.and(fact.ithVar(getVar(column,y)).not());
             }
         }
         // Rule that says either that the above and below variables are false, or that the variable(column,row) is false.
-        rules = (fact.nithVar(getVar(column,row))).or(rules);
+        rules = (fact.ithVar(getVar(column,row)).not()).or(rules);
         rulesBDD = rulesBDD.and(rules); // Adding to the overall ruleest.
     }
 
@@ -134,19 +134,19 @@ public class toreBDD implements IQueensLogic{
         int x = column+1;
         int y = row+1;
         while(x < size && y < size){
-            rules = rules.and(fact.nithVar(getVar(x,y)));
+            rules = rules.and(fact.ithVar(getVar(x,y)).not());
             x++;
             y++;
         }
         x = column-1;
         y = row-1;
         while(x > 0 && y >0){
-            rules = rules.and(fact.nithVar(getVar(x,y)));
+            rules = rules.and(fact.ithVar(getVar(x,y)).not());
             x--;
             y--;
         }
         // rule that says either the variable at (column,row) is not true or the above diagonal ruleset is true.
-        rules = (fact.nithVar(getVar(column,row))).or(rules);
+        rules = (fact.ithVar(getVar(column,row)).not()).or(rules);
         rulesBDD = rulesBDD.and(rules); // adding rules to the overall ruleset.
     }
 
@@ -161,19 +161,19 @@ public class toreBDD implements IQueensLogic{
         int x = column-1;
         int y = row+1;
         while(x >= 0 && y < size){
-            rules = rules.and(fact.nithVar(getVar(x,y)));
+            rules = rules.and(fact.ithVar(getVar(x,y)).not());
             x--;
             y++;
         }
         x = column+1;
         y = row-1;
         while(y >= 0 && x < size){
-            rules = rules.and(fact.nithVar(getVar(x,y)));
+            rules = rules.and(fact.ithVar(getVar(x,y)).not());
             x++;
             y--;
         }
         // rule that says either the variable at (column,row) is not true or the above diagonal ruleset is true.
-        rules = (fact.nithVar(getVar(column,row))).or(rules);
+        rules = (fact.ithVar(getVar(column,row)).not()).or(rules);
         rulesBDD = rulesBDD.and(rules); // Adding rules to the overall ruleset.
     }
 
@@ -193,7 +193,7 @@ public class toreBDD implements IQueensLogic{
      */
     public Boolean checkIfValid(int column, int row){
         BDD validCheck = rulesBDD.restrict(fact.ithVar(getVar(column,row))); // Restricting bdd, if the variable is true
-        return !validCheck.isZero(); // Returns if valid bdd
+        return !validCheck.isZero();
     }
 
     public void updateBoard(){
